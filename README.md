@@ -1,6 +1,6 @@
 # 凝思（Ningsi）
 
-仓库：`bsense-ningsi`｜Python 包与命令：`ningsi`｜版本：`0.1.0`
+仓库：`ningsi`（https://github.com/zjhaaa042-cloud/ningsi ）｜Python 包与命令：`ningsi`｜版本：`0.1.0`
 
 基于便携脑电设备的**专注力强化训练与心理状态评估系统**，对应 A09 赛题
 「AI+便携脑电设备的专注力强化训练系统」（杭州金扬智能科技有限公司）。
