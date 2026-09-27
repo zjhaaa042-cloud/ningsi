@@ -103,7 +103,8 @@ ningsi/
 | https://github.com/shaun5297/bsense-dataset-studio | 0.2.0 | `77669cf`（2026-09-11） | 只读参照 + `adapters/studio.py` 读取其 `derived/features/records.csv` |
 
 - 本仓库不复制上游代码，以独立包形式追加产品层能力；上游的提交历史与远端配置保持不变。
-- 许可：本仓库自研代码的许可证尚未确定；`bsense-lsl` 上游未附带开源许可证，公开或再分发前需与比赛、设备厂商确认。
+- 许可：本项目自研代码以 **MIT** 许可证发布（见 [LICENSE](LICENSE)）；上游 `bsense-lsl` / `bsense-dataset-studio` 未附带许可证，本项目未复制其代码，只通过公开接口读取其数据产物。
+- MIT 许可只覆盖代码本身，不构成对任何评估结论的医学背书；结论使用边界见第 6 节。
 - 复现：`scripts/verify.ps1` 可一键复跑 51 个用例与一次端到端演示；示例产物见 `examples/sample_run/`。
 
 ---
