@@ -14,6 +14,7 @@ from ningsi import config
 # 状态 → 各频带目标幅度（µV 峰值）：(theta 6 Hz, alpha 10 Hz, beta 18 Hz, gamma 35 Hz)
 STATE_PRESETS = {
     "rest": {"theta": 6.0, "alpha": 16.0, "beta": 6.0, "gamma": 2.0},
+    "eyes_closed": {"theta": 5.0, "alpha": 24.0, "beta": 4.0, "gamma": 1.5},
     "focused": {"theta": 2.0, "alpha": 14.0, "beta": 16.0, "gamma": 4.0},
     "drowsy": {"theta": 9.0, "alpha": 20.0, "beta": 4.0, "gamma": 1.5},
     "loaded": {"theta": 16.0, "alpha": 7.0, "beta": 8.0, "gamma": 2.0},

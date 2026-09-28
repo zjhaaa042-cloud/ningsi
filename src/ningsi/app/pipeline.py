@@ -50,7 +50,7 @@ class SessionConfig:
     channels: int = 1
     seed: int = 7
     training_mode: str = "quick"
-    baseline_windows: int = 8
+    baseline_seconds: tuple = (config.BASELINE_PROTOCOL["eyes_open_sec"], config.BASELINE_PROTOCOL["eyes_closed_sec"])
     task_plan: tuple = (("rest", 8), ("focused", 12), ("drowsy", 15))
     sas_answers: tuple = tuple([2] * 20)
     sds_answers: tuple = tuple([2] * 20)
@@ -125,10 +125,23 @@ class SessionRunner:
             "passed": len(usable) >= 3,
         }
 
-    def collect_baseline(self, count: int | None = None, state: str = "rest"):
-        count = count or self.config.baseline_windows
+    def collect_baseline(self, seconds: float | None = None, state: str = "rest"):
+        """按秒数采集基线窗；4 秒窗、2 秒步长，故窗数 = 秒数 / 2。"""
+        duration = float(seconds if seconds is not None else self.config.baseline_seconds[0])
+        count = max(1, int(round(duration / config.STEP_SEC)))
         return [analyze_window(self.eeg.window(state), self.config.srate, t_end=index * config.STEP_SEC)
                 for index in range(count)]
+
+    def collect_baselines(self) -> dict:
+        """睁眼与闭眼静息基线各自独立质检与建基线（文档 7.2.4、8.4.2）。"""
+        open_seconds, closed_seconds = self.config.baseline_seconds
+        eyes_open = build_baseline(self.collect_baseline(open_seconds, "rest"),
+                                   device=self.config.device, srate=self.config.srate,
+                                   min_windows=config.BASELINE_PROTOCOL["min_windows"])
+        eyes_closed = build_baseline(self.collect_baseline(closed_seconds, "eyes_closed"),
+                                     device=self.config.device, srate=self.config.srate,
+                                     min_windows=config.BASELINE_PROTOCOL["min_windows"])
+        return {"eyes_open": eyes_open, "eyes_closed": eyes_closed}
 
     def run_scales(self) -> dict:
         results = {}
@@ -232,7 +245,7 @@ class SessionRunner:
             results = [compute_indicators(w, baseline_before) for w in wins]
             samples = [(w.t_end, r.score("focus")) for w, r in zip(wins, results)]
             session.add_segment(samples, plan["segment_sec"], excluded_windows=sum(1 for w in wins if not w.usable))
-        after_windows = self.collect_baseline(count=6)
+        after_windows = self.collect_baseline(seconds=30.0)
         baseline_after = build_baseline(after_windows, device=self.config.device, srate=self.config.srate)
         return session.summary(baseline_before, baseline_after)
 
@@ -243,9 +256,14 @@ class SessionRunner:
 
         artifacts.quality = self.device_qc()
         artifacts.scales = self.run_scales()
-        baseline_windows = self.collect_baseline()
-        baseline = build_baseline(baseline_windows, device=self.config.device, srate=self.config.srate)
-        artifacts.baseline = baseline.as_dict()
+        baselines = self.collect_baselines()
+        baseline = baselines[config.BASELINE_PROTOCOL["task_reference"]]
+        artifacts.baseline = {
+            "protocol": dict(config.BASELINE_PROTOCOL),
+            "reference": config.BASELINE_PROTOCOL["task_reference"],
+            "eyes_open": baselines["eyes_open"].as_dict(),
+            "eyes_closed": baselines["eyes_closed"].as_dict(),
+        }
         artifacts.behavior = self.run_behavior()
 
         task = self.run_task(baseline)
@@ -277,7 +295,11 @@ class SessionRunner:
             behavior=artifacts.behavior,
             assessment=assessment,
             extras={"device": self.config.device, "srate": self.config.srate, "channels": self.config.channels,
-                    "alerts": artifacts.alerts},
+                    "alerts": artifacts.alerts,
+                    "baseline_protocol": artifacts.baseline["protocol"],
+                    "baseline_reference": artifacts.baseline["reference"],
+                    "baseline_eyes_open": artifacts.baseline["eyes_open"],
+                    "baseline_eyes_closed": artifacts.baseline["eyes_closed"]},
         )
         reports = self.root / "reports"
         reports.mkdir(parents=True, exist_ok=True)

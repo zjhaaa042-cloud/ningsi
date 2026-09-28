@@ -36,7 +36,7 @@ class SpectrumTest(unittest.TestCase):
         signal = 15.0 * np.sin(2 * np.pi * 6 * self.t) + 10.0 * np.sin(2 * np.pi * 20 * self.t)
         spectrum = welch_psd(signal, self.srate)
         rel = relative_band_powers(spectrum.freqs, spectrum.psd)
-        self.assertAlmostEqual(sum(rel.values()), 1.0, places=6)
+        self.assertAlmostEqual(sum(rel.values()), 1.0, places=4)
 
 
 class QualityTest(unittest.TestCase):

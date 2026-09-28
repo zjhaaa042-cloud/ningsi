@@ -21,7 +21,9 @@ class PipelineTest(unittest.TestCase):
     def test_all_steps_produce_results(self):
         data = self.artifacts.as_dict()
         self.assertTrue(self.artifacts.quality["passed"])
-        self.assertTrue(self.artifacts.baseline["valid"])
+        self.assertEqual(self.artifacts.baseline["reference"], "eyes_open")
+        self.assertTrue(self.artifacts.baseline["eyes_open"]["valid"])
+        self.assertTrue(self.artifacts.baseline["eyes_closed"]["valid"])
         self.assertIn("SAS", self.artifacts.scales)
         self.assertIn("sds", {k.lower() for k in self.artifacts.scales})
         self.assertEqual(self.artifacts.behavior["sart"]["trials"], 180)

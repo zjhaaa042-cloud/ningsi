@@ -8,7 +8,7 @@
 
 | # | 文档原文位置 | 现在的问题 | 建议替换为 | 代码依据 |
 |---|---|---|---|---|
-| 1 | 概要「三 功能简介」/ 详细方案 8.4.1 基线时长 | 概要写"闭眼 3 分钟、睁眼 2 分钟"，详细方案 8.4.1 另写一套，仓库与凝思实际为 60 秒窗 | 统一为：「静息基线：睁眼 60 秒 + 闭眼 60 秒，按 4 秒窗、2 秒步长逐窗质检，至少 5 个合格窗才建立基线」 | `config.WELCH`、`signal/baseline.py::build_baseline`（min_windows=5） |
+| 1 | 概要「三 功能简介」/ 详细方案 8.4.1 基线时长 | 概要写"闭眼 3 分钟、睁眼 2 分钟"，详细方案 8.4.1 另写一套，凝思会话内基线为睁眼、闭眼各 2 分钟 | 已在 v2 文档中统一为：「静息基线：睁眼 2 分钟 + 闭眼 2 分钟，按 4 秒窗、2 秒步长逐窗质检，两段各自独立建基线，任务态以睁眼基线为参照；每段至少 5 个合格窗才建立基线」 | `config.WELCH`、`signal/baseline.py::build_baseline`（min_windows=5） |
 | 2 | 详细方案 8.3.1 频谱估计 | 原文写 Welch PSD（4 s 窗 / 2 s 分段 / 50% 重叠 / 汉宁窗）——**这一条现已实现**，但需注明是自研实现 | 保留参数描述，补一句「自研零依赖实现，位于 `signal/spectrum.py`，不依赖 SciPy」 | `signal/spectrum.py::welch_psd`；`tests/test_signal.py::SpectrumTest` |
 | 3 | 详细方案 7.2.13 / 8.x 硬件范围 | 原文写"硬件无关，OpenBCI / Muse / Emotiv 均可" | 改为：「通过 LSL 抽象层接入，凡发布标准 EEG 流的设备均可适配；**当前已完成 BSense-R → BioMultiLite → LSL 链路验证**，其他厂商需按其 SDK/驱动确认后逐台验收」 | `acquisition/lsl_source.py`；`docs/REQUIREMENT_COVERAGE.md` 第一节 |
 | 4 | 全文产品名与许可 | "凝思"在概要仅出现 1 次，其余用"系统"；`bsense-lsl` 无开源许可证 | 首次出现处统一写「凝思（Ningsi）」；许可表述改为「自研代码 + NumPy 等开源依赖，上游采集工程与其设备厂商的许可另行确认」 | `README.md` 第 5 节 |

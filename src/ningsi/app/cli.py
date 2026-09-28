@@ -16,8 +16,11 @@ def _print_summary(artifacts) -> None:
     print(f"凝思会话完成：sub-{data['participant']} / ses-{data['session']} / run-{data['run']}")
     print(f"  设备质检：{artifacts.quality['usable']}/{artifacts.quality['windows']} 窗通过"
           f"（不可用原因 {artifacts.quality['reasons'] or '无'}），判定 {'通过' if artifacts.quality['passed'] else '未通过'}")
-    print(f"  静息基线：{'有效' if artifacts.baseline['valid'] else '无效'}"
-          f"，{artifacts.baseline['n_windows']} 个可用窗")
+    open_base = artifacts.baseline["eyes_open"]
+    closed_base = artifacts.baseline["eyes_closed"]
+    print(f"  静息基线：睁眼 {'有效' if open_base['valid'] else '无效'}（{open_base['n_windows']} 窗）"
+          f"＋闭眼 {'有效' if closed_base['valid'] else '无效'}（{closed_base['n_windows']} 窗）"
+          f"；任务态以{artifacts.baseline['reference']}为参照")
     for code, result in sorted(artifacts.scales.items()):
         print(f"  量表 {code}：粗分 {result['raw_score']}，标准分 {result['standard_score']}，{result['level']}")
     sart = artifacts.behavior.get("sart", {})
@@ -79,7 +82,8 @@ def _ui(args) -> int:
 
 def _self_test(args) -> int:
     import unittest
-    tests_dir = Path(__file__).resolve().parents[2].parent / "tests"
+    # app/cli.py -> app -> ningsi -> src -> <repo>/tests
+    tests_dir = Path(__file__).resolve().parents[3] / "tests"
     suite = unittest.defaultTestLoader.discover(str(tests_dir))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1

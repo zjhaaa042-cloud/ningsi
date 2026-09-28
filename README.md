@@ -1,4 +1,4 @@
-# 凝思（Ningsi）
+﻿# 凝思（Ningsi）
 
 仓库：`ningsi`（https://github.com/zjhaaa042-cloud/ningsi ）｜Python 包与命令：`ningsi`｜版本：`0.1.0`
 
@@ -24,7 +24,7 @@
 | 热力图与趋势 | `monitoring/heatmap.py`、`history.py` | 五档着色 + 低质量缺失色块、周/月趋势 SVG、跨设备不可比提示 |
 | 可训练模型 | `models/logistic.py` | 逻辑回归基线模型、按被试划分、AUC/混淆矩阵、JSON 版本化保存 |
 | 结构化报告 | `assessment/report.py` | 状态评分 / 问题分析 / 改善建议 / 证据回填 / 边界声明（Markdown + JSON） |
-| 桌面界面 | `app/ui.py` | 五个页签：状态指标、状态热力图、神经反馈训练、评估报告、历史趋势 |
+| 桌面界面 | `app/ui.py` | 六个页签：状态指标、实时波形与频谱、状态热力图、神经反馈训练、评估报告、历史趋势 |
 
 ## 2. 快速开始
 
@@ -63,9 +63,9 @@ var/demo/
 
 | 口径 | 版本号 | 关键参数 |
 |---|---|---|
-| 频谱 | `welch-v1` | 4 s 窗、2 s 分段、50% 重叠、汉宁窗、0–45 Hz |
+| 频谱 | `welch-v1` | 4 s 窗、2 s 分段、50% 重叠、汉宁窗、NFFT 512（Δf 0.488 Hz）、0–45 Hz；0.5 Hz 漂移校正 + 50/60 Hz 陷波 |
 | 指标 | `indicator-v1` | 专注 β/θ、放松 α/β、负荷 θ/α；z 裁剪 ±3；逻辑映射斜率 1.1 |
-| 基线 | `baseline-v1` | 至少 5 个合格窗；离散度下限 0.15 nat 或均值的 10% |
+| 基线 | `baseline-v1` | 睁眼 2 分钟 + 闭眼 2 分钟（各 60 窗），两段独立建基线，任务态以睁眼基线为参照；至少 5 个合格窗；离散度下限 0.15 nat 或均值的 10% |
 | 联合评估 | `joint-assessment-v1` | 低专注 <0.40、高负荷 ≥0.65、量表提示 ≥50 分 |
 | 训练 | `neurofeedback-v1` | 初始目标 = 基线中位数对应评分；步长 0.05；保持时长 6–20 s |
 | 模型 | `logistic-v1` | 6 维频带特征；被试级 6:2:2 划分 |
@@ -76,11 +76,25 @@ var/demo/
 ningsi/
 ├── src/ningsi/         38 个模块（signal / scales / behavior / assessment / training / monitoring / models / acquisition / adapters / app）
 ├── tests/              51 个用例（信号、量表、行为、评估、预警、热力图、趋势、训练、模型、端到端）
+├── examples/sample_run/ 一次完整会话的示例产物（报告、热力图、趋势、量表、模型、历史）
+├── tools/              revise_docs.py（docx 口径修订）、build_ppt.py（PPT 与配图）、relayout_figures.py（docx 插图版式优化）
 ├── docs/               产品使用说明、赛题覆盖对照、文档口径修订清单
 ├── examples/           示例运行产物（供评审直接查看，无需运行）
 ├── scripts/verify.ps1  一键验证：跑测试 + 跑端到端演示
 └── var/                本地运行产物（已加入 .gitignore）
 ```
+
+### 交付物生成顺序（改动文档或配图后按此重跑）
+
+```powershell
+python tools/revise_docs.py        # 1. 从原始 docx 生成 v2（封面、口径、表格）
+python tools/relayout_figures.py   # 2. 优化 v2 内所有插图的版式（外边距 + 标题带留白）
+python tools/build_ppt.py          # 3. 生成 PPT 骨架与 5 张配图
+```
+
+`relayout_figures.py` 的版式规则：检测顶部标题带 → 补上/左/右内边距 → 拉开标题与副标题行距 →
+整图加白色外边距 → 补白还原原始宽高比（避免 Word 拉伸变形）；原文件自动备份到 `_analysis/backup/`。
+若目标 docx 正在 Word 中打开，会改写到 `*-插图优化.docx` 而不覆盖。
 
 ## 5. 与上游工程的关系
 
@@ -106,6 +120,28 @@ ningsi/
 - 许可：本项目自研代码以 **MIT** 许可证发布（见 [LICENSE](LICENSE)）；上游 `bsense-lsl` / `bsense-dataset-studio` 未附带许可证，本项目未复制其代码，只通过公开接口读取其数据产物。
 - MIT 许可只覆盖代码本身，不构成对任何评估结论的医学背书；结论使用边界见第 6 节。
 - 复现：`scripts/verify.ps1` 可一键复跑 51 个用例与一次端到端演示；示例产物见 `examples/sample_run/`。
+
+---
+
+## 8. Web 应用（主界面）：ningsi-studio
+
+Web 应用独立成库：[`ningsi-studio`](https://github.com/zjhaaa042-cloud/ningsi-studio)（前端 + 后端 + 数据保存），以本仓库为算法引擎：
+
+```powershell
+git clone https://github.com/zjhaaa042-cloud/ningsi-studio.git
+cd ningsi-studio
+.\run.bat                  # 双击也可：建环境 → 启动服务 → 打开浏览器
+.\run.ps1 -Action demo     # 无浏览器跑一次完整会话（快速模式）
+```
+
+- 能力分工：本仓库负责算法与口径，`ningsi-studio` 负责服务、持久化与界面；
+  两者共用同一份 `config.py` 与同一批领域模块，因此三端结论一致。
+- 界面：单页 Web（原生 ES Module，离线可用）七个视图：概览 / 被试管理 / 会话流程（十一阶段向导）/
+  实时监测（指标 + 波形 + 热力图 + 预警时间轴）/ 训练中心 / 历史与趋势 / 报告。
+- 数据：SQLite（WAL）为权威库，另以与本仓库同格式的 JSONL 台账双写（`history/sessions.jsonl`、
+  `scales/*.jsonl`），可用 `python -m ningsi_studio export-ledger` 从库重放。
+- 关系：`ningsi ui`（Tkinter 桌面界面）保留为**离线兜底**，命令行与桌面版行为不变；
+  现场演示以 Web 版为主。
 
 ---
 

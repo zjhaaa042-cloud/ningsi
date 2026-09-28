@@ -21,8 +21,8 @@
 | 深度学习（CNN/LSTM）选型 | 路线图 | 上游 `dataset/eegnet.py` 已能导出 `X[N,C,T]` 窗口 | 作为后续工作，不影响当前解释性 |
 | 脑电 + 量表 + 专注力指标联合映射 | 已实现 | `assessment/joint.py`（六步流程 + 一致性 + 缺失分支） | `tests/test_assessment.py::JointAssessmentTest` |
 | 结构化评估报告（评分/分析/建议） | 已实现 | `assessment/report.py`（Markdown + JSON，含证据回填） | `tests/test_assessment.py::ReportTest` |
-| 实时脑电波形与频谱可视化 | 已实现 | `app/ui.py`「实时波形与频谱」页签 | UI 冒烟测试 + 界面截图 |
-| 状态热力图 | 已实现 | `monitoring/heatmap.py` + UI「状态热力图」页签 | `tests/test_assessment.py::HeatmapHistoryTest` |
+| 实时脑电波形与频谱可视化 | 已实现 | `app/ui.py`「实时波形与频谱」页签；Web 版同功能见 `../ningsi-studio/web/`「实时监测」视图 | UI 冒烟测试 + 界面截图 |
+| 状态热力图 | 已实现 | `monitoring/heatmap.py` + 桌面「状态热力图」页签 + Web `/api/sessions/{uuid}/heatmap` | `tests/test_assessment.py::HeatmapHistoryTest` |
 | 历史记录查询与周/月趋势 | 已实现 | `monitoring/history.py`（含跨设备可比性保护） | `test_history_aggregation_and_comparability` |
 | 状态实时预警（高压力/低专注） | 已实现 | `monitoring/alerts.py`（连续越界计时 + 伪迹窗停表） | `tests/test_assessment.py::AlertTest` |
 
@@ -33,7 +33,7 @@
 | （1）真实脑电信号采集 | 部分实现 | LSL 源 + 仿真源；无设备时全链路仍可演示（界面与报告标注数据来源） |
 | （2）信号预处理与特征提取 | 已实现 | 四级处理链 + Welch 频带特征 + 时域特征；参数逐窗留痕（`ChainLog`） |
 | （3）专注力联合识别与评估 | 已实现 | SAS/SDS 量表 + SART/PVT-B + 三指标 + 联合评估 + 实时预警 |
-| （4）可视化监测系统 | 已实现 | 六页签界面：状态指标、实时波形与频谱、状态热力图、训练、报告、趋势 |
+| （4）可视化监测系统 | 已实现 | 桌面六页签界面：状态指标、实时波形与频谱、状态热力图、训练、报告、趋势；Web 版七个视图（`../ningsi-studio/`） |
 
 ## 三、赛题要求的四类核心挑战
 
@@ -51,7 +51,7 @@
 | （1）项目概要介绍 | 已有（`A09-凝思-项目概要介绍-最终版.docx`），口径修订见 `docs/DOC_ALIGNMENT.md` |
 | （2）项目简介 PPT | 待制作 |
 | （3）项目详细方案 | 已有（`A09-凝思-项目详细方案-最终版.docx`），口径修订见 `docs/DOC_ALIGNMENT.md` |
-| （4）项目演示视频 | 待录制（可用 `ningsi ui` 与 `ningsi demo` 作为录制脚本） |
+| （4）项目演示视频 | 待录制（可用 Web 版 `ningsi-studio` 与 `ningsi ui`、`ningsi demo` 作为录制脚本） |
 | （5）① 产品使用说明文档（系统架构与流程说明） | 本仓库 `docs/PRODUCT_GUIDE.md` |
 | （6）自愿补充材料 | `docs/REQUIREMENT_COVERAGE.md`、测试用例与运行产物 |
 

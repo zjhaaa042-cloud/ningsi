@@ -23,7 +23,7 @@ STATE_SEQUENCE = ("rest",) * 4 + ("focused",) * 10 + ("drowsy",) * 8 + ("loaded"
 
 
 class StudioWindow:
-    """主窗口：一个 Notebook，五个页签对应五类界面。"""
+    """主窗口：一个 Notebook，六个页签对应六类界面。"""
 
     def __init__(self, root_dir: str = "var/session", participant: str = "p01") -> None:
         import tkinter as tk
@@ -110,7 +110,7 @@ class StudioWindow:
         for index, (freq, power) in enumerate(zip(spectrum.freqs, spectrum.psd)):
             x = 10 + index * bar_width
             height = 190 * float(power) / peak
-            color = "#e8a33d" if 4 <= freq < 8 else ("#4a7fb5" if 8 <= freq < 13 else ("#2b3a67" if 13 <= freq < 30 else "#8fbf9f"))
+            color = "#E69F00" if 4 <= freq < 8 else ("#56B4E9" if 8 <= freq < 13 else ("#1B3B6F" if 13 <= freq < 30 else "#6E9E8A"))
             self.spectrum_canvas.create_rectangle(x, 210 - height, x + bar_width - 1, 210, fill=color, outline="")
         self.spectrum_canvas.create_line(10, 210, 930, 210, fill="#999")
         for freq in (4, 8, 13, 30):

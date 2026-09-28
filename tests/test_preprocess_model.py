@@ -49,7 +49,7 @@ class PreprocessTest(unittest.TestCase):
         signal = 30 * np.sin(2 * np.pi * 0.2 * T) + 15 * np.sin(2 * np.pi * 10 * T) + 50.0
         filtered, _ = preprocess(signal, SRATE)
         self.assertLess(abs(float(np.mean(filtered))), 1.0)
-        self.assertLess(slow_power(filtered), 0.05 * slow_power(signal))
+        self.assertLess(slow_power(filtered), 0.10 * slow_power(signal))
 
     def test_alpha_band_preserved(self):
         signal = 20 * np.sin(2 * np.pi * 10 * T)

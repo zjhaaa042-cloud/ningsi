@@ -20,6 +20,7 @@ class Spectrum:
     segments: int
     segment_sec: float
     taper: str
+    nfft: int = 0
     spec: str = config.SPECTRUM_SPEC
 
     def meta(self) -> dict:
@@ -28,6 +29,8 @@ class Spectrum:
             "segments": self.segments,
             "segment_sec": self.segment_sec,
             "taper": self.taper,
+            "nfft": self.nfft,
+            "delta_f_hz": round(1.0 / (self.nfft / 250.0), 4) if self.nfft else None,
             "fmax": float(self.freqs[-1]) if self.freqs.size else 0.0,
         }
 
@@ -63,8 +66,12 @@ def welch_psd(
     window = hann(nperseg)
     win_power = float(np.sum(window ** 2))
     n_segments = 1 + (x.size - nperseg) // step
-    n_freqs = nperseg // 2 + 1
-    freqs = np.fft.rfftfreq(nperseg, d=1.0 / srate)
+    # NFFT 取不小于分段点数的 2 的整数次幂（250 Hz、2 秒分段时为 512 点）
+    nfft = 1
+    while nfft < nperseg:
+        nfft *= 2
+    n_freqs = nfft // 2 + 1
+    freqs = np.fft.rfftfreq(nfft, d=1.0 / srate)
     acc = np.zeros(n_freqs, dtype=float)
 
     for index in range(n_segments):
@@ -72,7 +79,7 @@ def welch_psd(
         segment = x[start:start + nperseg].copy()
         if detrend == "mean":
             segment -= segment.mean()
-        spectrum = np.fft.rfft(segment * window)
+        spectrum = np.fft.rfft(segment * window, n=nfft)
         power = (np.abs(spectrum) ** 2) / (srate * win_power)
         power[1:-1] *= 2.0
         acc += power
@@ -85,6 +92,7 @@ def welch_psd(
         segments=n_segments,
         segment_sec=nperseg / srate,
         taper=config.WELCH["taper"],
+        nfft=nfft,
     )
 
 
