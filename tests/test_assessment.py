@@ -67,6 +67,25 @@ class ReportTest(unittest.TestCase):
         self.assertIn("sas_standard_score", markdown)
         self.assertEqual(json.loads(report.to_json())["participant"], "p01")
 
+    def test_overlapping_windows_note_only_for_real_fast_sessions(self):
+        """快速演示模式的真机会话要提醒"窗计数是高重叠样本"；仿真与真实节奏不提。"""
+        base = (
+            "p01", "01", "001",
+            {"summary": {}, "band_z": {}, "quality": {}},
+            {"windows_total": 35, "windows_usable": 0, "valid_ratio": 0.0,
+             "unusable_reasons": {"eog": 35}},
+            {}, {}, None,
+        )
+        real_fast = SessionReport(*base, extras={"source_kind": "lsl", "time_scale": 0.05}).to_markdown()
+        self.assertIn("高重叠样本", real_fast)
+        real_rhythm = SessionReport(*base, extras={"source_kind": "lsl", "time_scale": 1.0}).to_markdown()
+        self.assertNotIn("高重叠样本", real_rhythm)
+        sim_fast = SessionReport(*base, extras={"source_kind": "sim", "time_scale": 0.05}).to_markdown()
+        self.assertNotIn("高重叠样本", sim_fast)
+        no_extras = SessionReport(*base).to_markdown()
+        self.assertNotIn("高重叠样本", no_extras)
+        self.assertIn("排除原因", no_extras)
+
 
 class AlertTest(unittest.TestCase):
     def setUp(self):

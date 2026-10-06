@@ -13,6 +13,21 @@ from ningsi import config
 from ningsi.assessment.joint import JointAssessment
 
 
+def _overlapping_windows(extras) -> bool:
+    """真实设备 + 快速演示模式：相邻分析窗读到几乎同一段缓冲，窗计数不是独立样本。
+
+    仿真源每窗重新生成数据，不存在这个问题；真机走的是常驻缓冲，快速模式下
+    `_sleep()` 把 2 秒步长压到 0.1 秒，于是"35 个窗"实际只覆盖约 3.5 秒的新数据
+    （实测质检阶段 5 个窗的指标逐字节相同，见 `_analysis/lsl-hardware/session_tight.json`）。
+    """
+    extras = extras or {}
+    try:
+        scale = float(extras.get("time_scale") or 1.0)
+    except (TypeError, ValueError):
+        scale = 1.0
+    return str(extras.get("source_kind") or "") == "lsl" and scale < 0.2
+
+
 @dataclass
 class SessionReport:
     participant: str
@@ -93,6 +108,12 @@ class SessionReport:
         if q.get("unusable_reasons"):
             detail = "、".join(f"{k}×{v}" for k, v in sorted(q["unusable_reasons"].items()))
             lines.append(f"- 排除原因：{detail}（含伪迹窗不计入指标）")
+        if _overlapping_windows(self.extras):
+            lines.append(
+                "- 采集口径提醒：真实设备 + 快速演示模式（time_scale < 0.2）下相邻 4 秒窗读到的是"
+                "几乎同一段缓冲数据，上面的可用窗计数是**高重叠样本**，只能用于链路自检；"
+                "真实节奏采集请用 time_scale = 1.0（此时量表与按键任务由本人操作）。"
+            )
 
         lines += ["", "## 三、量表结果"]
         if self.scales:
