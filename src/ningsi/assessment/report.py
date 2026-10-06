@@ -57,6 +57,18 @@ class SessionReport:
             f"- 指标口径：{config.INDICATOR_SPEC}；基线口径：{config.BASELINE_SPEC}；处理链：{config.SPECTRUM_SPEC}",
             f"- 软件版本：{config.VERSION}",
             "",
+        ]
+        # 真实设备专用：把采集调理口径写进报告表头（仿真源没有这一步，不出现这一行）
+        conditioning = (self.extras or {}).get("signal_conditioning") or {}
+        if conditioning:
+            stages = (conditioning.get("chain") or {}).get("stages") or []
+            chain_text = " → ".join(str(stage.get("stage", "")) for stage in stages) or "—"
+            lines.append(
+                f"- 采集调理：{conditioning.get('spec', '—')}"
+                f"（{conditioning.get('dc_removal', '—')} → {chain_text}，零相位）；"
+                f"上下文 {conditioning.get('context_samples', '—')} 点 / 输出 {conditioning.get('window_samples', '—')} 点"
+            )
+        lines += [
             "## 一、状态评分",
         ]
         indicator_summary = self.indicators.get("summary", {}) if isinstance(self.indicators, dict) else {}

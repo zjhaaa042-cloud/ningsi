@@ -28,6 +28,8 @@
               │     CLI 提供同一套能力的脚本入口）
 智能层      四级处理链 → Welch 频谱 → 频带特征 → 三指标 → 质量门控 → 联合评估 → 模型与建议
               │   （signal/ · behavior/ · assessment/ · models/）
+              │   真机额外一步：逐通道去直流（设备的电极偏置可达数百 mV，不去直流会让
+              │   幅度/通道跨度门槛每窗必然越界），随后才是 0.5 Hz 去漂移 → 陷波 → 45 Hz 低通
 支撑层      LSL 采集抽象 │ 文件与 JSONL 落盘 │ 口径与版本管理 │ 可复算的证据回填
               │   （acquisition/ · monitoring/history.py · config.py · assessment/report.py）
 ════════════════════════════════════════════════════════════
@@ -40,7 +42,7 @@
 |---|---|---|
 | 采集接入 | `acquisition/lsl_source.py` | 连接 LSL EEG 流，按窗口拉取数据；未装 pylsl 时给出明确提示 |
 | 仿真源 | `acquisition/simulate.py` | 生成静息/专注/困倦/高负荷四类可复现窗，供无设备联调与测试 |
-| 预处理 | `signal/preprocess.py` | 漂移校正、工频陷波、带通滤波，零相位并记录参数 |
+| 预处理 | `signal/preprocess.py` | 漂移校正、工频陷波、带通滤波，零相位并记录参数；**真实设备链路**（`ningsi-studio` 的 `ManagedLslSource`）在每窗前先做逐通道去直流再调用本链，仿真源保持原始口径 |
 | 频谱与频带 | `signal/spectrum.py`、`bands.py` | Welch PSD、频带积分、相对功率与比值 |
 | 逐窗特征 | `signal/window.py` | 一次算谱，输出频带、时域与质量结果，供下游共用 |
 | 质量门控 | `signal/artifacts.py` | 幅度/恒定/跨度/肌电/眼电判定，附不可用原因 |

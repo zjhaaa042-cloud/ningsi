@@ -202,12 +202,35 @@ def _consistency(evidence, thresholds) -> tuple[dict, dict]:
             "missing": [i.code for i in items if not i.available],
         }
     consistency = {
-        "eeg_vs_scale": "不一致" if _mismatch(states.get("stress"), "eeg", "scales")
-        else ("一致" if states.get("stress", {}).get("state") == "一致提示偏离" else "无冲突"),
-        "eeg_vs_behavior": "不一致" if _mismatch(states.get("attention"), "eeg", "behavior")
-        else ("一致" if states.get("attention", {}).get("state") == "一致提示偏离" else "无冲突"),
+        "eeg_vs_scale": _pair_consistency(states.get("stress"), "量表"),
+        "eeg_vs_behavior": _pair_consistency(states.get("attention"), "行为任务"),
     }
     return states, consistency
+
+
+def _pair_consistency(state, other_label: str) -> str:
+    """脑电与另一侧证据的一致性判定。
+
+    之前这里直接写 `"不一致" if _mismatch(...) else ("一致" if ... else "无冲突")`，
+    而 `_mismatch()` 在任一侧缺证据时返回 False，于是"脑电完全不可用 + 量表提示偏离"
+    会落到 `状态 == 一致提示偏离 → "一致"`，凭空断言"脑电与量表一致"——真机会话
+    `be4114d37dc94cf393673235be4150e3` 的报告就是这样写的（0/35 可用窗 + 一致）。
+    因此缺证据时明确给出"无法比较"，并写清缺的是哪一侧。
+    """
+    if not state:
+        return f"无法比较（{other_label}与脑电均无可用证据）"
+    codes = list(state.get("evidence_codes", []))
+    has_eeg = any(code.startswith("eeg_") for code in codes)
+    has_other = any(not code.startswith("eeg_") for code in codes)
+    if not has_eeg and not has_other:
+        return f"无法比较（{other_label}与脑电均无可用证据）"
+    if not has_eeg:
+        return "无法比较（脑电不可用）"
+    if not has_other:
+        return f"无法比较（{other_label}不可用）"
+    if _mismatch(state, "eeg", other_label):
+        return "不一致"
+    return "一致" if state.get("state") == "一致提示偏离" else "无冲突"
 
 
 def _mismatch(state, source_a: str, source_b: str) -> bool:
