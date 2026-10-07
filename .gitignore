@@ -27,3 +27,7 @@ Thumbs.db
 # Office 临时锁文件
 ~$*.docx
 ~$*.xlsx
+
+# 验收证据（截图 / JSON / 报告，含会话数据）：不入公开仓，本地保留
+# 需要时看本地 _analysis/ 或用备份分支 backup-before-publish（本地）
+_analysis/
