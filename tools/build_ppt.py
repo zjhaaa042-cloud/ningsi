@@ -576,10 +576,11 @@ SLIDES = [
             "热力图五档着色，低质量窗用独立「缺失」色块，不把伪迹画成状态变化",
             "趋势按周/月聚合；设备、采样率或通道变化时明确标注不可比并排除",
         ],
-        "images": ["fig_heatmap.png", "fig_trend.png"],
-        "notes": "如果时间允许，这里切到实机界面演示；PPT 中的图来自仿真源示例，"
-                 "正式录制时替换为真实设备截图。趋势图在首次会话后只有一个数据点，"
-                 "属于正常状态——它随复评次数累积，这也是我们不在首次会话就给趋势结论的原因。",
+        "images": ["ui_live.png", "ui_history.png"],
+        "notes": "这一页直接用实机界面截图：左图是实时监测（含热力图分档色带与质量缺失色块），"
+                 "右图是历史与趋势。趋势按可比条件过滤后聚合，设备或口径变化时断开曲线并标注不可比；"
+                 "首次会话只有一个数据点属于正常状态——它随复评次数累积，"
+                 "这也是我们不在首次会话就给趋势结论的原因。",
     },
     {
         "title": "十二、工程实现与测试证据",
@@ -615,6 +616,53 @@ SLIDES = [
         "notes": "结尾留 20 秒：可信度随实测数据积累提升，而不是随宣称能力扩张。"
                  "主动说明边界，是这套系统最想表达的态度。",
     },
+    {
+        "title": "十五、团队与分工：四条协作约定",
+        "bullets": [
+            "团队 4 人：项目负责人 1 人，其余 3 人分任信号与算法、产品与开发、评估与交付三条工作线",
+            "每周一次信号复核：用伪迹验证数据检查识别效果，并复核指标口径",
+            "每阶段末一次交付评审：逐项核对阶段产物、文档表述与代码实现是否一致",
+            "指标定义变更必须同步更新文档、代码与测试；真实设备联调由两条工作线共同在场",
+            "过程留痕：周会纪要与联调记录写明周次、参与人、议题与结论，评审意见与整改项一并归档",
+        ],
+        "image": "fig_team_photos.png",
+        "layout": "wide",
+        "bullets_h": 2.30,
+        "bullet_size": 17,
+        "notes": "这一页放团队交流的真人照片（周例会 / 设备联调 / 阶段评审三张），"
+                 "图注写清拍摄时间、地点与参与人。要强调的是：协作不是口头约定，"
+                 "而是有固定节奏与留痕的机制，这也是各项口径能在文档、代码与报告之间保持一致的原因。",
+    },
+    {
+        "title": "十六、进度与关键路径：16 周甘特图",
+        "bullets": [
+            "P1 W1–W3 硬件接入与采集 → P2 W4–W6 预处理与特征 → P3 W7–W9 指标与模型 → "
+            "P4 W10–W13 训练与可视化 → P5 W14–W16 验证与交付",
+            "关键路径为 P2 的伪迹处理与 P4 的训练闭环；贯穿任务为文档口径维护、每周信号复核与真实数据采集",
+            "五个里程碑各有可核对的判据：设备接入与完整会话录制 → 处理链回归用例 → 指标与评估可复算 → "
+            "训练闭环与界面可用 → 51 个用例通过且五项材料齐备",
+        ],
+        "image": "fig_gantt.png",
+        "layout": "wide",
+        "bullets_h": 1.95,
+        "bullet_size": 16,
+        "notes": "若设备到货延迟，P1 可先用仿真信号推进 P2 的算法开发，但 P2 的验收必须使用真实设备数据；"
+                 "这一条写进甘特图下方的说明里，避免把排期写成承诺。",
+    },
+    {
+        "title": "十七、界面一览：Web 主界面四个视图",
+        "bullets": [
+            "上排：概览（状态指标）· 实时监测（波形、频谱与质量分档）；"
+            "下排：训练中心（实时专注度与分段记录）· 报告与产物（结论与证据回填）",
+            "界面取自 ningsi-studio 实际运行；桌面端六个页签与之一一对应，离线时使用桌面端",
+        ],
+        "image": "fig_ui_grid.png",
+        "layout": "wide",
+        "bullets_h": 1.05,
+        "bullet_size": 16,
+        "notes": "四个视图对应现场演示的操作路径：从状态指标到实时监测，再到训练与报告，一步不断链；"
+                 "每个视图上的数字都能在报告与质量记录里找到来源。",
+    },
 ]
 def collect_demo_data():
     import sys
@@ -625,7 +673,7 @@ def collect_demo_data():
     from ningsi.monitoring import history
 
     runner = SessionRunner(SessionConfig(
-        root=str(OUT / "ppt_demo"), participant="p01",
+        root=str(ROOT / "var" / "ppt_demo"), participant="p01",
         task_plan=(("rest", 6), ("focused", 12), ("drowsy", 12), ("loaded", 8)),
     ))
     baselines = runner.collect_baselines()
@@ -682,7 +730,9 @@ def section_accent(index: int) -> str:
         return TEAL          # 架构 · 流程 · 技术 · 指标
     if index <= 12:
         return BLUE          # 质量 · 评估 · 训练 · 可视化
-    return VERM              # 工程 · 场景 · 边界
+    if index <= 14:
+        return VERM          # 工程 · 场景 · 边界
+    return {15: NAVY, 16: TEAL, 17: BLUE}.get(index, VERM)   # 团队 · 进度 · 界面
 
 
 def split_bullet(text: str):
@@ -698,8 +748,11 @@ FIGURE_CAPTIONS = {
     "fig_architecture.png": "图 1　凝思产品架构（四层 + 数据安全横条）",
     "fig_flow.png": "图 2　一次会话九步流程",
     "fig_indicators.png": "图 3　三个可解释指标（示例会话）",
-    "fig_heatmap.png": "图 4　状态热力图（示例会话）",
-    "fig_trend.png": "图 5　专注度周趋势",
+    "ui_live.png": "图 4　实时监测与质量分档（实机界面）",
+    "ui_history.png": "图 5　历史记录与趋势分析（实机界面）",
+    "fig_team_photos.png": "图 6　团队协作过程记录（周例会 / 设备联调 / 阶段评审）",
+    "fig_gantt.png": "图 7　项目主计划甘特图（16 周，含关键路径与里程碑）",
+    "fig_ui_grid.png": "图 8　Web 主界面四个视图",
 }
 
 MARGIN = 0.72
@@ -894,12 +947,27 @@ def content_slide(prs, spec, index, total, paths):
             add_caption(slide, x, 3.34 + figure_height(paths[name], width) + 0.10, width, name, accent)
     elif images:
         name = images[0]
-        add_bullets(slide, MARGIN, CONTENT_TOP, 5.95, CONTENT_BOTTOM - CONTENT_TOP, bullets, 17, accent)
-        width = 5.55
-        height = figure_height(paths[name], width)
-        top = CONTENT_TOP + (CONTENT_BOTTOM - CONTENT_TOP - height - CAPTION_HEIGHT - 0.08) / 2
-        add_figure(slide, paths[name], RIGHT_EDGE - width, top, width)
-        add_caption(slide, RIGHT_EDGE - width, top + height + 0.10, width, name, accent)
+        if spec.get("layout") == "wide":
+            # 通栏配图（甘特图 / 界面一览 / 团队照片）：要点在上，图按可用高度等比放大
+            bullets_h = spec.get("bullets_h", 1.20)
+            add_bullets(slide, MARGIN, 1.62, CONTENT_WIDTH, bullets_h, bullets,
+                        spec.get("bullet_size", 17), accent)
+            top = 1.62 + bullets_h + 0.10
+            avail_h = CONTENT_BOTTOM - top - CAPTION_HEIGHT - 0.10
+            with Image.open(paths[name]) as image:
+                ratio = image.width / image.height
+            width = min(CONTENT_WIDTH, avail_h * ratio)
+            height = width / ratio
+            x = round((13.333 - width) / 2, 3)
+            add_figure(slide, paths[name], x, top, width)
+            add_caption(slide, x, top + height + 0.10, width, name, accent)
+        else:
+            add_bullets(slide, MARGIN, CONTENT_TOP, 5.95, CONTENT_BOTTOM - CONTENT_TOP, bullets, 17, accent)
+            width = 5.55
+            height = figure_height(paths[name], width)
+            top = CONTENT_TOP + (CONTENT_BOTTOM - CONTENT_TOP - height - CAPTION_HEIGHT - 0.08) / 2
+            add_figure(slide, paths[name], RIGHT_EDGE - width, top, width)
+            add_caption(slide, RIGHT_EDGE - width, top + height + 0.10, width, name, accent)
     else:
         add_bullets(slide, MARGIN, CONTENT_TOP, 8.05, CONTENT_BOTTOM - CONTENT_TOP, bullets, 22, accent)
     add_rule(slide, 6.98, thickness=0.01)
@@ -925,6 +993,7 @@ def main() -> int:
     import sys
     sys.path.insert(0, str(ROOT / "ningsi" / "src"))
     summary, series, points = collect_demo_data()
+    ui = FIG / "ui"
     paths = {
         "fig_cover.png": draw_cover(),
         "fig_architecture.png": draw_architecture(),
@@ -932,7 +1001,17 @@ def main() -> int:
         "fig_indicators.png": draw_indicators(summary),
         "fig_heatmap.png": draw_heatmap(series),
         "fig_trend.png": draw_trend(points),
+        # 实机界面截图与新增图示（由 _analysis/prep_ui_assets.py 与
+        # _analysis/fig_*.py 生成；重跑本脚本不会覆盖它们）
+        "ui_live.png": ui / "ui_live.png",
+        "ui_history.png": ui / "ui_history.png",
+        "fig_team_photos.png": FIG / "fig_team_photos.png",
+        "fig_ui_grid.png": FIG / "fig_ui_grid.png",
+        "fig_gantt.png": ROOT / "deliverables" / "figures_new" / "fig_gantt.png",
     }
+    missing = [str(p) for p in paths.values() if not Path(p).exists()]
+    if missing:
+        raise SystemExit("缺少素材，请先生成：\n  " + "\n  ".join(missing))
     for name, path in paths.items():
         print(f"  配图：{path} （{round(os.path.getsize(path) / 1024)} KB）")
     pptx = build_pptx(paths)
