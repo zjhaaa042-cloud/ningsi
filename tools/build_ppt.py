@@ -451,7 +451,9 @@ SLIDES = [
     {
         "title": "凝思（Ningsi）",
         "subtitle": "AI+便携脑电设备的专注力强化训练系统\n每一段专注，都看得见",
-        "bullets": ["赛题编号：A09 ｜ 命题企业：杭州金扬智能科技有限公司", "团队：胆double天队 ｜ 汇报人：____________（提交前填写）", "2026 年 9 月"],
+        "bullets": ["赛题编号：A09 ｜ 命题企业：杭州金扬智能科技有限公司",
+                    "团队：胆double天队（张嘉辉、李骞恒、黄柯语、叶瑞洋）",
+                    "汇报人：张嘉辉（队长）　｜　2026 年 10 月"],
         "notes": "开场 15 秒：凝思是一套基于便携脑电设备的专注力强化训练与心理状态评估系统，"
                  "解决的是同一件事——把脑电从能采到，做成能判、能练、能复评。",
     },
@@ -617,21 +619,19 @@ SLIDES = [
                  "主动说明边界，是这套系统最想表达的态度。",
     },
     {
-        "title": "十五、团队与分工：四条协作约定",
+        "title": "十五、团队与分工：三条工作线与协作节奏",
         "bullets": [
-            "团队 4 人：项目负责人 1 人，其余 3 人分任信号与算法、产品与开发、评估与交付三条工作线",
-            "每周一次信号复核：用伪迹验证数据检查识别效果，并复核指标口径",
-            "每阶段末一次交付评审：逐项核对阶段产物、文档表述与代码实现是否一致",
-            "指标定义变更必须同步更新文档、代码与测试；真实设备联调由两条工作线共同在场",
-            "过程留痕：周会纪要与联调记录写明周次、参与人、议题与结论，评审意见与整改项一并归档",
+            "团队 4 人：队长张嘉辉（项目负责人），队员李骞恒、黄柯语、叶瑞洋；"
+            "按信号与算法 / 产品与开发 / 评估与交付三条工作线分工",
+            "每周一次信号复核；每阶段末一次交付评审，逐项核对文档、代码与产物是否一致",
         ],
         "image": "fig_team_photos.png",
         "layout": "wide",
-        "bullets_h": 2.30,
+        "bullets_h": 1.45,
         "bullet_size": 17,
-        "notes": "这一页放团队交流的真人照片（周例会 / 设备联调 / 阶段评审三张），"
-                 "图注写清拍摄时间、地点与参与人。要强调的是：协作不是口头约定，"
-                 "而是有固定节奏与留痕的机制，这也是各项口径能在文档、代码与报告之间保持一致的原因。",
+        "notes": "这一页放团队赛期内的真实照片：左图是设备接入与会话流程的联调现场，"
+                 "右图是文档、代码与报告口径的方案讨论。要强调的是：协作不是口头约定，"
+                 "而是每周信号复核 + 阶段末交付评审两条固定节奏，这也是各项口径能在文档、代码与报告之间保持一致的原因。",
     },
     {
         "title": "十六、进度与关键路径：16 周甘特图",
@@ -652,14 +652,12 @@ SLIDES = [
     {
         "title": "十七、界面一览：Web 主界面四个视图",
         "bullets": [
-            "上排：概览（状态指标）· 实时监测（波形、频谱与质量分档）；"
-            "下排：训练中心（实时专注度与分段记录）· 报告与产物（结论与证据回填）",
-            "界面取自 ningsi-studio 实际运行；桌面端六个页签与之一一对应，离线时使用桌面端",
+            "概览（状态指标）· 实时监测（波形、频谱与质量分档）· 训练中心（专注度与分段记录）· 报告与产物（结论与证据回填）",
         ],
-        "image": "fig_ui_grid.png",
+        "image": "fig_ui_row.png",
         "layout": "wide",
-        "bullets_h": 1.05,
-        "bullet_size": 16,
+        "bullets_h": 0.95,
+        "bullet_size": 17,
         "notes": "四个视图对应现场演示的操作路径：从状态指标到实时监测，再到训练与报告，一步不断链；"
                  "每个视图上的数字都能在报告与质量记录里找到来源。",
     },
@@ -750,9 +748,10 @@ FIGURE_CAPTIONS = {
     "fig_indicators.png": "图 3　三个可解释指标（示例会话）",
     "ui_live.png": "图 4　实时监测与质量分档（实机界面）",
     "ui_history.png": "图 5　历史记录与趋势分析（实机界面）",
-    "fig_team_photos.png": "图 6　团队协作过程记录（周例会 / 设备联调 / 阶段评审）",
+    "fig_team_photos.png": "图 6　团队协作过程记录（设备联调与方案讨论现场）",
     "fig_gantt.png": "图 7　项目主计划甘特图（16 周，含关键路径与里程碑）",
     "fig_ui_grid.png": "图 8　Web 主界面四个视图",
+    "fig_ui_row.png": "图 8　Web 主界面四个视图",
 }
 
 MARGIN = 0.72
@@ -993,7 +992,7 @@ def main() -> int:
     import sys
     sys.path.insert(0, str(ROOT / "ningsi" / "src"))
     summary, series, points = collect_demo_data()
-    ui = FIG / "ui"
+    ui = FIGS / "ui"
     paths = {
         "fig_cover.png": draw_cover(),
         "fig_architecture.png": draw_architecture(),
@@ -1005,9 +1004,10 @@ def main() -> int:
         # _analysis/fig_*.py 生成；重跑本脚本不会覆盖它们）
         "ui_live.png": ui / "ui_live.png",
         "ui_history.png": ui / "ui_history.png",
-        "fig_team_photos.png": FIG / "fig_team_photos.png",
-        "fig_ui_grid.png": FIG / "fig_ui_grid.png",
-        "fig_gantt.png": ROOT / "deliverables" / "figures_new" / "fig_gantt.png",
+        "fig_team_photos.png": FIGS / "fig_team_photos.png",
+        "fig_ui_grid.png": FIGS / "fig_ui_grid.png",
+        "fig_ui_row.png": FIGS / "fig_ui_row.png",
+        "fig_gantt.png": ROOT / "deliverables" / "figures_v2" / "fig_gantt.png",
     }
     missing = [str(p) for p in paths.values() if not Path(p).exists()]
     if missing:
