@@ -83,6 +83,16 @@ class SessionReport:
                 f"（{conditioning.get('dc_removal', '—')} → {chain_text}，零相位）；"
                 f"上下文 {conditioning.get('context_samples', '—')} 点 / 输出 {conditioning.get('window_samples', '—')} 点"
             )
+        # 协议档：短协议必须写在报告表头（行为证据减半、未跑训练与模型），否则读者会拿它
+        # 与完整协议的结果直接比较。口径由会话行传入 extras.protocol_*。
+        protocol_label = (self.extras or {}).get("protocol_label")
+        protocol_note = (self.extras or {}).get("protocol_note")
+        if protocol_label:
+            skipped = (self.extras or {}).get("skipped_phases") or []
+            lines.append(f"- 检测协议：{protocol_label}"
+                         + (f"（本次未跑：{'、'.join(skipped)}）" if skipped else ""))
+            if protocol_note:
+                lines.append(f"- ⚠ 协议差异提醒：{protocol_note}")
         lines += [
             "## 一、状态评分",
         ]

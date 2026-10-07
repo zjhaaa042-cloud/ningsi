@@ -59,25 +59,38 @@ def _rng(seed: int):
     return next_int
 
 
-def build_sequence(participant: str, session: str, run: str) -> SartSequence:
+def build_sequence(participant: str, session: str, run: str,
+                   trials: int | None = None, nogo_trials: int | None = None,
+                   practice_trials: int | None = None) -> SartSequence:
+    """构建 SART 序列。
+
+    试次数可覆盖（短协议用一半）：**默认值就是完整协议的 180 / 20 / 12**，
+    不传参数时行为与历史版本完全一致（验收与 CLI 都不受影响）。
+    No-Go 位置仍按"等间距 + 抖动"生成，短协议下等间距自动跟着缩小。
+    """
+    total_trials = int(trials or TRIALS)
+    total_nogo = int(nogo_trials or NOGO_TRIALS)
+    total_practice = int(practice_trials if practice_trials is not None else PRACTICE_TRIALS)
+    if total_trials < 5 or total_nogo < 1 or total_nogo >= total_trials:
+        raise ValueError(f"SART 试次数不合理：trials={total_trials} nogo={total_nogo}")
     seed = _seed_from(participant, session, run)
     set_id = seed % SEQUENCE_SETS
     next_int = _rng(seed)
-    spacing = TRIALS / NOGO_TRIALS
+    spacing = total_trials / total_nogo
     positions = []
-    for index in range(NOGO_TRIALS):
+    for index in range(total_nogo):
         base = int(round(index * spacing))
         jitter = next_int(max(1, int(spacing) - 2)) - (max(1, int(spacing) - 2) // 2)
-        positions.append(min(TRIALS - 1, max(0, base + jitter)))
+        positions.append(min(total_trials - 1, max(0, base + jitter)))
     positions = sorted(set(positions))
-    while len(positions) < NOGO_TRIALS:
-        candidate = next_int(TRIALS)
+    while len(positions) < total_nogo:
+        candidate = next_int(total_trials)
         if candidate not in positions:
             positions.append(candidate)
     positions = tuple(sorted(positions))
 
     digits = []
-    for index in range(TRIALS):
+    for index in range(total_trials):
         if index in positions:
             digits.append(NOGO_DIGIT)
         else:
@@ -85,7 +98,7 @@ def build_sequence(participant: str, session: str, run: str) -> SartSequence:
             while value == NOGO_DIGIT:
                 value = 1 + next_int(9)
             digits.append(value)
-    practice = tuple(1 + next_int(9) for _ in range(PRACTICE_TRIALS))
+    practice = tuple(1 + next_int(9) for _ in range(max(0, total_practice)))
     return SartSequence(digits=tuple(digits), nogo_positions=positions, set_id=set_id, seed=seed, practice=practice)
 
 
